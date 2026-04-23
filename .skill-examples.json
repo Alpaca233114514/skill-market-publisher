@@ -1,0 +1,57 @@
+{
+  "model": "kimi k2.6",
+  "examples": [
+    {
+      "prompt": "帮我把我写好的 skill 发布到 Skill Market",
+      "aiResponses": [
+        {
+          "type": "thinking",
+          "content": "用户要求发布 skill 到 Skill Market。需要执行完整流程：1) 验证 skill 目录结构 2) 推送到 GitHub 获取 rootUrl 3) 确保 .skill-examples.json 存在 4) 使用 skill-market-cli --non-interactive 上传。"
+        },
+        {
+          "type": "toolcall",
+          "toolName": "Bash",
+          "toolInput": {
+            "command": "ls /c/Users/HP/.claude/skills/my-skill/",
+            "description": "检查 skill 目录结构"
+          }
+        },
+        {
+          "type": "toolcall",
+          "toolName": "Bash",
+          "toolInput": {
+            "command": "cd /c/Users/HP/.claude/skills/my-skill && git status",
+            "description": "检查 git 状态"
+          }
+        },
+        {
+          "type": "toolcall",
+          "toolName": "Bash",
+          "toolInput": {
+            "command": "skill-market-cli upload \"C:\\Users\\HP\\.claude\\skills\\my-skill\" -n \"my-skill\" -d \"Skill description\" -t \"tag1,tag2\" -m \"kimi k2.6\" --non-interactive",
+            "description": "非交互式上传 skill 到 Skill Market"
+          }
+        },
+        {
+          "type": "message",
+          "content": "已成功将 skill 发布到 Skill Market！\n\n- Skill ID: 1776953211857\n- 访问地址: https://kirigaya.cn/skill/1776953211857\n\n上传摘要：\n- 名称：my-skill\n- 模型：kimi k2.6\n- 标签：tag1, tag2\n- rootUrl: https://raw.githubusercontent.com/..."
+        }
+      ],
+      "model": "kimi k2.6"
+    },
+    {
+      "prompt": "skill-market-cli upload 报错了，说 readline closed",
+      "aiResponses": [
+        {
+          "type": "thinking",
+          "content": "用户遇到 skill-market-cli 上传报错 'ERR_USE_AFTER_CLOSE' / 'readline closed'。这是交互式终端在非 TTY 环境（如 AI Agent、CI）中崩溃的典型问题。解决方案是使用 --non-interactive 参数并提供所有必填字段。"
+        },
+        {
+          "type": "message",
+          "content": "这个错误是因为 `skill-market-cli` 的交互式询问在自动化环境中无法工作。\n\n**解决方案**：使用 `--non-interactive` 参数并预填所有字段：\n\n```bash\nskill-market-cli upload /path/to/skill \\\n  -n \"skill-name\" \\\n  -d \"skill description\" \\\n  -t \"tag1,tag2\" \\\n  -m \"kimi k2.6\" \\\n  --non-interactive\n```\n\n**必填项**：\n- `-n` name：skill 名称\n- `-d` description：skill 描述\n- `.skill-examples.json`：至少一条用户案例（可手动创建）\n\n**自动默认值**：\n- model → `deepseek-chat`\n- tags → `['general']`\n- rootUrl → 本地 file:// 路径（建议 frontmatter 中写死 GitHub raw URL）"
+        }
+      ],
+      "model": "kimi k2.6"
+    }
+  ]
+}
