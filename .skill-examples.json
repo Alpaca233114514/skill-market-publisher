@@ -28,13 +28,13 @@
           "type": "toolcall",
           "toolName": "Bash",
           "toolInput": {
-            "command": "skill-market-cli upload \"C:\\Users\\HP\\.claude\\skills\\my-skill\" -n \"my-skill\" -d \"Skill description\" -t \"tag1,tag2\" -m \"kimi k2.6\" --non-interactive",
+            "command": "skill-market-cli upload \"C:\\Users\\HP\\.claude\\skills\\my-skill\" -n \"my-skill\" -d \"Skill description\" -t \"tag1,tag2\" --non-interactive",
             "description": "非交互式上传 skill 到 Skill Market"
           }
         },
         {
           "type": "message",
-          "content": "已成功将 skill 发布到 Skill Market！\n\n- Skill ID: 1776953211857\n- 访问地址: https://kirigaya.cn/skill/1776953211857\n\n上传摘要：\n- 名称：my-skill\n- 模型：kimi k2.6\n- 标签：tag1, tag2\n- rootUrl: https://raw.githubusercontent.com/..."
+          "content": "已成功将 skill 发布到 Skill Market！\n\n- Skill ID: 1776953211857\n- 访问地址: https://kirigaya.cn/skill/1776953211857\n\n上传摘要：\n- 名称：my-skill\n- 模型：自动检测 (claude-sonnet)\n- 标签：tag1, tag2\n- rootUrl: https://raw.githubusercontent.com/..."
         }
       ],
       "model": "kimi k2.6"
@@ -48,7 +48,7 @@
         },
         {
           "type": "message",
-          "content": "这个错误是因为 `skill-market-cli` 的交互式询问在自动化环境中无法工作。\n\n**解决方案**：使用 `--non-interactive` 参数并预填所有字段：\n\n```bash\nskill-market-cli upload /path/to/skill \\\n  -n \"skill-name\" \\\n  -d \"skill description\" \\\n  -t \"tag1,tag2\" \\\n  -m \"kimi k2.6\" \\\n  --non-interactive\n```\n\n**必填项**：\n- `-n` name：skill 名称\n- `-d` description：skill 描述\n- `.skill-examples.json`：至少一条用户案例（可手动创建）\n\n**自动默认值**：\n- model → `deepseek-chat`\n- tags → `['general']`\n- rootUrl → 本地 file:// 路径（建议 frontmatter 中写死 GitHub raw URL）"
+          "content": "这个错误是因为 `skill-market-cli` 的交互式询问在自动化环境中无法工作。\n\n**解决方案**：使用 `--non-interactive` 参数并预填所有字段：\n\n```bash\nskill-market-cli upload /path/to/skill \\\n  -n \"skill-name\" \\\n  -d \"skill description\" \\\n  -t \"tag1,tag2\" \\\n  --non-interactive\n```\n\n`-m` 参数可选；CLI 会自动检测运行环境并选择合适的模型。\n\n**必填项**：\n- `-n` name：skill 名称\n- `-d` description：skill 描述\n- `.skill-examples.json`：至少一条用户案例（可手动创建）\n\n**自动默认值**：\n- model → 自动检测环境（Claude Code → `claude-sonnet`，Kimi Code → `kimi`，其他 → `claude-sonnet`）\n- tags → `['general']`\n- rootUrl → 本地 file:// 路径（建议 frontmatter 中写死 GitHub raw URL）"
         }
       ],
       "model": "kimi k2.6"

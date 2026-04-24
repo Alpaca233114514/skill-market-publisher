@@ -22,8 +22,9 @@ Complete workflow to publish a skill from local workspace to Skill Market.
 1. Validate skill directory structure
 2. Push to GitHub (for rootUrl)
 3. Ensure .skill-examples.json exists
-4. Run skill-market-cli upload --non-interactive
-5. Verify upload success
+4. Identify your own model (non-interactive only)
+5. Run skill-market-cli upload --non-interactive
+6. Verify upload success
 ```
 
 ## Phase 1: Validate & Prepare
@@ -96,10 +97,41 @@ Skill Market AI channel requires at least one usage example with AI trajectory (
 
 ## Phase 4: Upload
 
-### Non-Interactive Mode (Recommended for Agents)
+### Environment Auto-Detection
 
-Use `--non-interactive` to skip all prompts. Missing fields use defaults or error out:
+`skill-market-cli` detects your runtime environment and recommends the appropriate model automatically:
 
+| Environment | Detected By | Recommended Model |
+|-------------|-------------|-------------------|
+| Claude Code | `CLAUDE_CODE` env | `claude-sonnet` |
+| Kimi Code | `KIMI_CODE` env | `kimi` |
+| Cursor | `CURSOR_TRACE_ID` / `CURSOR_ENV` env | `claude-sonnet` |
+| VS Code | `VSCODE_CWD` / `TERM_PROGRAM=vscode` | `claude-sonnet` |
+| Other / Unknown | — | `claude-sonnet` |
+
+In **interactive mode**, the CLI presents a three-option selector:
+1. **Detected model** (e.g., `kimi` for Kimi Code)
+2. **Default model** (`claude-sonnet`)
+3. **Custom input** (enter any model name)
+
+You can always override with `-m <model>`. To disable auto-detection entirely, set `SMCLI_DISABLE_ENV_DETECT=1`.
+
+### Pre-Upload: Agent Model Self-Identification (Non-Interactive)
+
+Before executing `--non-interactive` upload, the Agent **must ask itself "what model am I?"** and pass the exact answer via `-m`. This ensures the uploaded skill's `model` field precisely matches the environment where it will be used.
+
+**How to self-identify**:
+
+1. Based on your system context, capabilities, and self-knowledge, determine your exact model name.
+2. Pass that exact name via `-m`.
+
+**Examples**:
+- If you recognize yourself as **Kimi k2.6** → `-m "kimi k2.6"`
+- If you recognize yourself as **Claude Sonnet** → `-m "claude-sonnet"`
+- If you recognize yourself as **GPT-4o** → `-m "gpt-4o"`
+- If you are **uncertain** → omit `-m`; the CLI will auto-detect
+
+**Example command** (Agent identifying itself as Kimi k2.6):
 ```bash
 skill-market-cli upload /path/to/skill \
   -n "skill-name" \
@@ -109,12 +141,27 @@ skill-market-cli upload /path/to/skill \
   --non-interactive
 ```
 
+The Agent should perform this self-identification **before every non-interactive upload**. Do not map or transform the model name—use your self-identified exact model name.
+
+### Non-Interactive Mode (Recommended for Agents)
+
+Use `--non-interactive` to skip all prompts. Missing fields use defaults or error out:
+
+```bash
+skill-market-cli upload /path/to/skill \
+  -n "skill-name" \
+  -d "Skill description" \
+  -t "tag1,tag2,tag3" \
+  -m "<self-identified-model>" \
+  --non-interactive
+```
+
 **Field behavior in --non-interactive**:
 | Field | Source | Fallback |
 |-------|--------|----------|
 | name | `-n` arg → frontmatter | **Error exit** |
 | description | `-d` arg → frontmatter | **Error exit** |
-| model | `-m` arg → frontmatter | `'deepseek-chat'` |
+| model | `-m` arg → frontmatter → auto-detect | `claude-sonnet` (env-detected) |
 | tags | `-t` arg → frontmatter | `['general']` |
 | rootUrl | frontmatter | `file://...` (often rejected by server) |
 | usageExamples | `.skill-examples.json` | Auto-collect if prompts exist; **Error** if completely missing |
@@ -126,6 +173,17 @@ For manual use when terminal supports interactive input:
 ```bash
 skill-market-cli upload /path/to/skill -y
 ```
+
+The CLI will prompt for missing fields. When reaching the model selection step, you will see a **three-option selector** based on your detected environment:
+
+```
+选择推荐模型（用于案例采集与提交，建议与线上一致）：
+❯ 使用识别模型: claude-sonnet (Claude Code)
+  使用默认模型: claude-sonnet
+  其他（手动输入）
+```
+
+Select **Detected model** to use the environment-recommended model, **Default model** for the global fallback, or **Custom input** to specify any model name (e.g., `gpt-4o`, `claude-opus`).
 
 ## Phase 5: Troubleshooting
 
